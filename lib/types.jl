@@ -4,8 +4,9 @@ using HiGHS
 using Logging
 
 Base.@kwdef mutable struct JointSpec
-    spec::Dict{Symbol, Bool}
+    spec::Dict{Symbol, Bool} = Dict{Symbol, Bool}()
 end
+JointSpec(vars::Vector{Symbol}, vals::BitVector) = JointSpec(vars, collect(vals))
 JointSpec(vars::Vector{Symbol}, vals::Vector{Bool}) = JointSpec(Dict(vars .=> vals))
 
 
@@ -13,6 +14,13 @@ Base.@kwdef mutable struct SampleSpace
     n_var::Int = length(vars)
     vars::Vector{Symbol}
     var_index::Vector{JointSpec} 
+end
+
+function SampleSpace(variable_names)
+    vars = sort(Symbol.(variable_names))
+    n_var = length(vars)
+    var_index = _all_joint_specs(n_var, vars)
+    return SampleSpace(n_var, vars, var_index)
 end
 
 @enum Direction leq=1 geq=-1 eq=0 
@@ -34,4 +42,4 @@ Base.@kwdef mutable struct PMFConstraint{P<:Union{Float64,ProbabilityExpression}
     end
 end
 
-export JointSpec, ProbabilityExpression, PMFConstraint
+export SampleSpace, JointSpec, ProbabilityExpression, PMFConstraint, Direction
