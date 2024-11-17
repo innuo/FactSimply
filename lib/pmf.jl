@@ -54,6 +54,7 @@ function maxent(ss::SampleSpace,
     model = JuMP.Model(Ipopt.Optimizer)
 
     @variable(model, 0 <= pmf_table[ss.var_index] <= 1)
+    @constraint(model, sum(pmf_table[i] for i in ss.var_index) == 1.0)
     for c in constraints
         if c.direction == eq 
             @constraint(model, prob(c.lhs, pmf_table, ss) == prob(c.rhs, pmf_table, ss))
@@ -67,5 +68,8 @@ function maxent(ss::SampleSpace,
     optimize!(model)
     maxent_pmf_table = value.(pmf_table)
     query_prob = prob(query, maxent_pmf_table, ss)
+    print(model)
+    @show "=="
+    print(maxent_pmf_table)
     return query_prob
 end
