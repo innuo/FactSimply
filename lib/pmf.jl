@@ -73,3 +73,33 @@ function maxent(ss::SampleSpace,
     print(maxent_pmf_table)
     return query_prob
 end
+
+function compute_bounds(ss::SampleSpace, 
+    constraints::Vector{PMFConstraint{T}}, 
+    query::ProbabilityExpression) where T <: Float64
+
+    model = JuMP.Model(Ipopt.Optimizer)
+
+    @variable(model, 0 <= pmf_table[ss.var_index] <= 1)
+    @constraint(model, sum(pmf_table[i] for i in ss.var_index) == 1.0)
+    for c in constraints
+        terms = term_wise_prob(c, pmf_table, ss)
+        if terms.direction == eq 
+            @constraint(model, terms.num == terms.rhs * terms.den)
+        elseif c.direction == leq 
+            @constraint(model, terms.num <= terms.rhs * terms.den)
+        else
+            @constraint(model, terms.num >= terms.rhs * terms.den)         
+        end
+    end
+    query_prob = prob(query, pmf_table, ss)
+    @objective(model, Min, query_prob)
+    optimize!(model)
+    lb = objective_value(model)
+
+    @objective(model, Max, query_prob)
+    optimize!(model)
+    ub = objective_value(model)
+
+    return (lb, ub)
+end

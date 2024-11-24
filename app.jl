@@ -1,14 +1,24 @@
 module App
 using FactSimply
 using GenieFramework
+using StippleLatex
+using StippleUI
+
 @genietools
 
 @app begin
-    #reactive code goes here
+    # Reactive variables
+    @in slider_value = 0.5
+    @in text_input = ""
 end
 
 function ui()
-    p("") #initialized to an empty paragraph
+    [
+       
+            slider(:slider_value)
+            textinput(:text_input)
+    
+            ]
 end
 
 @page("/", ui)
