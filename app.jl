@@ -61,7 +61,7 @@ function custom_styles()
         body { background-color: #f4f4f4; }
         .facts-container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .facts-header { text-align: center; color: #007bff; padding-bottom: 20px; }
-        .facts-input { margin-bottom: 20px; }
+        .facts-input { margin-bottom: 20px; margin-left: 5px; margin-right: 5px; }
         .facts-list { list-style-type: none; padding: 0; }
         .facts-item { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; border-radius: 4px; background-color: #f8f9fa; }
         .facts-item label { margin-left: 10px; flex-grow: 1; }
@@ -86,32 +86,35 @@ function ui()
             header(class="facts-header", [
                 h1("FactSimply: What Do Your Beliefs Imply?", style="margin-bottom: 50px; text-decoration: underline;")
             ]),
-            cell(
+           
             section(class="facts-input", [
 
                 row([
                 # Input field for new facts, bound to new_facts variable
-                input(class="form-control col-3", placeholder="The joint event (e.g., 'A, !B')", @bind(:new_facts), @on("keyup.enter", "process_new_facts = !process_new_facts")),
-                cell(class="col-1", p("Given", style="text-align: center;")),
-                input(class="form-control col-3", placeholder="What joint conditions (e.g., '!A, !C')", @bind(:new_facts), @on("keyup.enter", "process_new_facts = !process_new_facts")),
-                cell(class="col-1", p("")),
-                Html.div(class="col-3",
-                    range(0.0:0.1:1.0, 
-                        :prob_range;
-                        snap=true,
-                        labelalways=true,
-                        label=true,
-                        lazy=true,
-                        dragrange=true,
-                    ))
-                ])
+                    input(class="facts-input col-3", placeholder="The joint event (e.g., 'A, !B')", @bind(:new_facts), @on("keyup.enter", "process_new_facts = !process_new_facts")),
+                    cell(class="col-1", p("conditioned on", style="text-align: center; font-weight: bold;")),
+                    input(class="facts-input col-3", placeholder="the joint conditions (e.g., '!A, !C')", @bind(:new_facts), @on("keyup.enter", "process_new_facts = !process_new_facts")),
+                    #cell(class="col-1", p("")),
+                    p(class="col-1", " has probability: ", style="font-weight: bold;"),
+                    cell(class="col-3",   range(0.0:0.1:1.0, 
+                                :prob_range;
+                                snap=true,
+                                labelalways=true,
+                                label=true,
+                                lazy=true,
+                                dragrange=true,
+                            )),
+                    ]),
+                    
+                   row([
+                    cell(class="col-1",button("Assume", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterAll }", @on("click", "filter = 'assume'"))),
+                    cell(class="col-1", button("Query", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterActive }", @on("click", "filter = 'query'"))),
+                    ]),
+                        
+                ]),
             ]),
-            ),
-            section(class="facts-button", [
-                # Filter buttons
-                button("Assume", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterAll }", @on("click", "filter = 'assume'")),
-                button("Query", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterActive }", @on("click", "filter = 'query'")),
-            ]),
+
+            
             section(class="facts-list", [
                 ul(class="facts-list", [
                     # List of factss, using @recur for iteration
@@ -129,8 +132,8 @@ function ui()
                 # Display count of active factss
                 span("{{ active_facts }} facts left", class="text-muted")
             ])
-        ])
-    ]
+        ]
+    
 end
 
 
