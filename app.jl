@@ -1,14 +1,55 @@
 module App
 using FactSimply
 using GenieFramework
+
+
 using StippleLatex
+using StippleUI
 
 
 @genietools
 
+
+mutable struct Fact{P}
+    what_text::String
+    when_text::String
+    prob_range::P
+    is_query::Bool
+end
+
+
 @app begin
     @in what_text = ""
     @in when_text = ""
+    @in prob_range = (min=0.0, max=1.0)
+    @in prob_range_changed = false
+    @in type = ""
+
+    @in process_new_fact = false  
+    @in clear_completed = false  
+    @in delete_fact = 0  
+ 
+    # Define private and output variables
+    @private facts = Fact[]  
+    @out num_facts = 0  
+
+    @onchange type  begin
+        @info "Type changed" type
+        #@info prob_range
+    end
+
+    @onchange prob_range begin
+        @info "Probability range changed" prob_range
+    end
+
+    @onchange prob_range_changed begin
+        @info "Probability range changed" prob_range
+    end
+
+
+    @onchange facts begin
+        @info "Facts changed" todos
+    end
 end
 
 # function ui()
@@ -77,48 +118,56 @@ end
 
 function ui()
     # Add Bootstrap CSS
-    Stipple.Layout.add_css("https://bootswatch.com/5/lumen/bootstrap.min.css")
+    #Stipple.Layout.add_css("https://bootswatch.com/5/lumen/bootstrap.min.css")
+    Stipple.Layout.add_css("https://bootswatch.com/5/litera/bootstrap.min.css")
     # Add custom styles
     Stipple.Layout.add_css(custom_styles)
 
     [
-        section(class="facts-container", v__cloak=true, [
+        row(
+            section(class="facts-container", v__cloak=true, [
             header(class="facts-header", [
-                h1("FactSimply: What Do Your Beliefs Imply?", style="margin-bottom: 50px; text-decoration: underline;")
-            ]),
-           
-            section(class="facts-input", [
-
-                row([
-                # Input field for new facts, bound to new_facts variable
-                    input(class="facts-input col-3", placeholder="The joint event (e.g., 'A, !B')", @bind(:new_facts), @on("keyup.enter", "process_new_facts = !process_new_facts")),
-                    cell(class="col-1", p("conditioned on", style="text-align: center; font-weight: bold;")),
-                    input(class="facts-input col-3", placeholder="the joint conditions (e.g., '!A, !C')", @bind(:new_facts), @on("keyup.enter", "process_new_facts = !process_new_facts")),
-                    #cell(class="col-1", p("")),
-                    p(class="col-1", " has probability: ", style="font-weight: bold;"),
-                    cell(class="col-3",   range(0.0:0.1:1.0, 
-                                :prob_range;
-                                snap=true,
-                                labelalways=true,
-                                label=true,
-                                lazy=true,
-                                dragrange=true,
-                            )),
-                    ]),
-                    
-                   row([
-                    cell(class="col-1",button("Assume", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterAll }", @on("click", "filter = 'assume'"))),
-                    cell(class="col-1", button("Query", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterActive }", @on("click", "filter = 'query'"))),
-                    ]),
-                        
+                # h1("FactSimply: What Do Your Beliefs Imply?", style="margin-bottom: 50px; text-decoration: underline;")
+                h1("TITLE", style="margin-bottom: 50px; text-decoration: underline;")
+                ]),        
+        ])),
+        
+        section(class="facts-input", [
+            row([
+            # Input field for new facts, bound to new_facts variable
+                input(class="facts-input col-2", placeholder="The joint event (e.g., 'A, !B')", @bind(:what_text)),
+                cell(class="col-1", p("conditioned on", style="text-align: center; font-weight: bold;")),
+                input(class="facts-input col-2", placeholder="the joint conditions (e.g., '!A, !C')", @bind(:when_text)),
+                p(class="col-2", " has probability in the range: ", style="font-weight: bold;"),
+            
+                cell(class="col-3",   range(0.0:0.1:1.0, 
+                            :prob_range;
+                            snap=true,
+                            labelalways=true,
+                            label=true,
+                            dragrange=true,
+                            dense=true,
+                            thumb__color="purple",
+                            thumb__size="35px",
+                            labelvalueleft=Symbol("'Min = ' + prob_range.min"),
+                            labelvalueright=Symbol("'Max = ' + prob_range.max"),
+                            @on("change", "prob_range_changed = true")
+                        )),
+                        p("P({{what_text}} | {{when_text}}) ∈ [{{prob_range.min}}, {{prob_range.max}}]", style="font-weight: bold; margin-left: 10px;"),
                 ]),
+                
+                
+                row([
+                    cell(class="col-1",button("Assume", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterAll }", @on("click", "type = 'assume'"))),
+                    cell(class="col-1", button("Query", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterActive }", @on("click", "type = 'query'"))),
+                    ]),                   
             ]),
 
+        
             
             section(class="facts-list", [
                 ul(class="facts-list", [
-                    # List of factss, using @recur for iteration
-                    li(class="facts-item", @recur("facts in filtered_factss"), (key!)="facts.id", [
+                    li(class="facts-item", @recur("facts in filtered_facts"), (key!)="facts.id", [
                         # Checkbox for toggling facts status
                         input(type="checkbox", class="form-check-input", @on("change", "toggle_facts = facts.id"), (checked!)="facts.completed", (id!)="'facts-' + facts.id"),
                         # facts text
@@ -128,6 +177,7 @@ function ui()
                     ])
                 ])
             ]),
+
             footer(class="facts-footer", [
                 # Display count of active factss
                 span("{{ active_facts }} facts left", class="text-muted")
