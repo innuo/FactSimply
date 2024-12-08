@@ -1,5 +1,6 @@
 types.jl
 constraints.jl
 pmf.jl
+parser.jl
 -test.jl
 
