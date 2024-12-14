@@ -60,6 +60,8 @@ end
     @private prob_range = (min=0.0, max=1.0)
     @out facts = Fact[]  
     @out num_facts = 0  
+    @out latex_formula = raw""
+    #@out latex_formula = raw"\sin^2 x"
 
     @onchange what_text begin
         fact = Fact(id, what_text, when_text, prob_range, is_query)
@@ -81,6 +83,7 @@ end
         id += 1
         push!(facts, fact)
         @push facts
+        latex_formula = raw"\begin{align} a &=b+c \\ d+e &=f \end{align}"
 
         num_facts = length(facts)
         @show num_facts
@@ -119,6 +122,7 @@ end
         is_query = false
 
         feedback_str = ""
+        latex_formula = raw""
 
         process_new_fact = false  
         clear_completed = false  
@@ -145,11 +149,9 @@ function custom_styles()
         .facts-list { list-style-type: none; padding: 5px; }
         .facts-list-container {background: white; padding: 5px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-left: 10px; margin-right: auto; }
         .facts-latex-container {background: white; padding: 5px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);margin-left: auto; margin-right: 10px;}
-        .facts-item { display: flex; align-items: center; margin-bottom: 0px; padding: 5px; border-radius: 4px; background-color: #f8f9fa; }
+        .facts-item { display: flex; align-items: center; margin-bottom: 0px; padding: 5px; border-radius: 4px; background-color: white; color: black; }
         .facts-item label { margin-left: 10px; flex-grow: 1; }
         .facts-item button { padding: 2px 8px; }
-        .facts-filters { margin-bottom: 20px; }
-        .facts-filters .btn { margin-right: 5px; }
         .btn-delete_fact_id { margin-left: auto; margin-right: 0; color: red; border-radius: 8px; background-color: #f8f9fa;}
         [v-cloak] { display: none; }
     </style>
@@ -207,7 +209,7 @@ function ui()
           
             row([
                 section(class="col facts-list-container", [
-                    h6("Facts", style="margin-bottom: 10px; text-decoration: underline;"),
+                    h5("Facts", style="margin-bottom: 10px; text-decoration: underline;"),
                     ul(class="facts-list", [
                         li(class="facts-item", @recur("fact in facts"), [
                             p("{{fact.printable}}", style="margin: 0;"),
@@ -216,12 +218,8 @@ function ui()
                     ])
                 ]),
                 section(class="col facts-latex-container", [
-                    ul(class="facts-list", [
-                        li(class="facts-item", @recur("fact in facts"), [
-                            p("{{fact.printable}}", style="margin: 0;"),
-                            button("×", class="btn-delete_fact_id", outline=true,color = "red", @on("click", "delete_fact_id = fact.id"))
-                        ])
-                    ])
+                    h5("Implications", style="margin-bottom: 10px; text-decoration: underline;"),
+                    cell(class = "facts-item", latex":latex_formula"display), 
                 ]),
             ]),
         ]

@@ -10,7 +10,7 @@ function parse_input(expression)
     vals = Bool[]
 
     for substring in substrings
-        cleaned_str = strip(substring)
+        cleaned_str = replace(substring, r"[^a-zA-Z0-9!]" => "")
         is_negated = startswith(cleaned_str, "!")
 
         if is_negated
