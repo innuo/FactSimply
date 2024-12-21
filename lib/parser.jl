@@ -1,6 +1,55 @@
+@kwdef mutable struct Fact{P}
+    id::Int
+    what_text::String
+    when_text::String
+    prob_range::P
+    is_query::Bool
+    printable::String = ""
+end
 
+function Fact(id, what_text, when_text, prob_range, is_query)
+    f = Fact{typeof(prob_range)}(id, what_text, when_text, prob_range, is_query, "")
+    f.printable = to_string(f)
+    return f
+end
 
+function probability_expression(fact::Fact)
+    (;var_symbols, vals) = parse_input(fact.what_text)
+    joint_spec = JointSpec(var_symbols, vals)
+ 
+    (;var_symbols, vals) =  parse_input(fact.when_text)
+    cond_spec = JointSpec(var_symbols, vals)
+    
+    pe = ProbabilityExpression(joint_spec=joint_spec, condition_spec=cond_spec)
+    return pe
+end
 
+function parse_problem(facts, query)
+    all_vars = Symbol[]
+    constraints = PMFConstraint[]
+
+    for f in facts
+        pe = probability_expression(f)
+        push!(all_vars, vars(pe)...)
+        if f.prob_range.max - f.prob_range.min < 0.01
+            constraint = PMFConstraint(lhs=pe, rhs=f.prob_range.min, direction=eq)
+            push!(constraints, constraint)
+        else
+            constraint = PMFConstraint(lhs=pe, rhs=f.prob_range.min, direction=geq)
+            push!(constraints, constraint)
+            constraint = PMFConstraint(lhs=pe, rhs=f.prob_range.max, direction=leq)
+            push!(constraints, constraint)
+        end
+
+    end
+    all_vars = unique(all_vars)
+    sample_space = SampleSpace(all_vars)
+
+    query_expression = probability_expression(query)
+    query_vars = vars(query_expression)
+
+    return (;sample_space, constraints, query_expression, query_vars)
+end
 
 function parse_input(expression)
     # Split the input by commas and remove leading/trailing spaces
@@ -48,5 +97,4 @@ function to_string(fact)
 end
 
 
-
-export parse_input, to_string
+export Fact, probability_expression, parse_problem, parse_input, to_string

@@ -48,8 +48,8 @@ prob(pe::ProbabilityExpression, pmf_table, ss::SampleSpace) =
         prob(pe.joint_spec, pe.condition_spec, pmf_table, ss)
 
 function maxent(ss::SampleSpace, 
-                constraints::Vector{PMFConstraint{T}}, 
-                query::ProbabilityExpression) where T
+                constraints::Vector{PMFConstraint}, 
+                query::ProbabilityExpression) 
     
     model = JuMP.Model(Ipopt.Optimizer)
 
@@ -68,15 +68,15 @@ function maxent(ss::SampleSpace,
     optimize!(model)
     maxent_pmf_table = value.(pmf_table)
     query_prob = prob(query, maxent_pmf_table, ss)
-    print(model)
+    @show solution_summary(model)
     @show "=="
     print(maxent_pmf_table)
     return query_prob
 end
 
 function compute_bounds(ss::SampleSpace, 
-    constraints::Vector{PMFConstraint{T}}, 
-    query::ProbabilityExpression) where T <: Float64
+    constraints::Vector{PMFConstraint}, 
+    query::ProbabilityExpression)
 
     model = JuMP.Model(Ipopt.Optimizer)
 

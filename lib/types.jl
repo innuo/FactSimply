@@ -6,9 +6,14 @@ using Logging
 Base.@kwdef mutable struct JointSpec
     spec::Dict{Symbol, Bool} = Dict{Symbol, Bool}()
 end
-JointSpec(vars::Vector{Symbol}, vals::BitVector) = JointSpec(vars, collect(vals))
-JointSpec(vars::Vector{Symbol}, vals::Vector{Bool}) = JointSpec(Dict(vars .=> vals))
 
+JointSpec(vars::Vector{Symbol}, vals::BitVector) = JointSpec(vars, collect(vals))
+function JointSpec(vars::Vector{Symbol}, vals::Vector{Bool}) 
+    (length(vars) == 0 || length(vals) == 0 || length(vars) != length(vals)) && return JointSpec()
+    return JointSpec(Dict(vars .=> vals))
+end
+
+vars(js::JointSpec) = sort(collect(keys(js.spec)))
 
 Base.@kwdef mutable struct SampleSpace
     n_var::Int = length(vars)
@@ -29,6 +34,8 @@ Base.@kwdef mutable struct ProbabilityExpression
     joint_spec::JointSpec
     condition_spec::JointSpec = JointSpec()
 end
+
+vars(pe::ProbabilityExpression) = unique([vars(pe.joint_spec); vars(pe.condition_spec)])
 
 Base.@kwdef mutable struct PMFConstraint{P<:Union{Float64,ProbabilityExpression}}
     lhs::ProbabilityExpression

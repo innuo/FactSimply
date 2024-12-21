@@ -8,36 +8,6 @@ using StippleUI
 
 @genietools
 
-@kwdef mutable struct Fact{P}
-    id::Int
-    what_text::String
-    when_text::String
-    prob_range::P
-    is_query::Bool
-    printable::String = ""
-end
-
-function Fact(id, what_text, when_text, prob_range, is_query)
-    f = Fact{typeof(prob_range)}(id, what_text, when_text, prob_range, is_query, "")
-    f.printable = to_string(f)
-    return f
-end
-
-# function Base.convert(
-#       ::Type{RangeData{Float64}},
-#       r::@NamedTuple{min::Float64, max::Float64},
-#   ) 
-#   @show r
-#     return RangeData(UnitRange(r.min, r.max))
-# end
-
-# function Base.convert(
-#     ::@NamedTuple{min::Float64, max::Float64},
-#     r::Type{RangeData{Float64}}
-# ) 
-#     return (min=first(r.range), max=last(r.range))
-# end
-
 @app begin
     @private id = 1
     @in what_text = ""
@@ -48,8 +18,7 @@ end
     @in query_btn_clicked = false
     @in clear_btn_clicked = false
     @in is_query = false
-
-    @out feedback_str = ""
+    @out query_error = false
 
     @in process_new_fact = false  
     @in clear_completed = false  
@@ -57,12 +26,13 @@ end
  
     # Define private and output variables
     @out fact = Fact(0, "", "", (min=0.0, max=1.0), false, "")
+    @out feedback_str = ""
+    
     @private prob_range = (min=0.0, max=1.0)
     @out facts = Fact[]  
     @out num_facts = 0  
-    @out latex_formula = raw""
-    #@out latex_formula = raw"\sin^2 x"
-
+    @out answer_str = ""
+    
     @onchange what_text begin
         fact = Fact(id, what_text, when_text, prob_range, is_query)
         feedback_str = fact.printable
@@ -75,6 +45,7 @@ end
     @onbutton assume_btn_clicked  begin
         @show "assume button clicked"
         is_query = false
+        query_error = false
         fact = Fact(id, what_text, when_text, prob_range, is_query)
         feedback_str = fact.printable
 
@@ -83,18 +54,32 @@ end
         id += 1
         push!(facts, fact)
         @push facts
-        latex_formula = raw"\begin{align} a &=b+c \\ d+e &=f \end{align}"
+        #latex_formula = raw"\begin{align} a &=b+c \\ d+e &=f \end{align}"
 
         num_facts = length(facts)
-        @show num_facts
-
+        
     end
 
     @onbutton query_btn_clicked  begin
-        @show "assume button clicked"
+        @show "query button clicked"
         is_query = true
-        fact = Fact(0, what_text, when_text, (min=0.0, max=1.0), is_query)
-        feedback_str = fact.printable
+        query = Fact(0, what_text, when_text, (min=0.0, max=1.0), is_query)
+        feedback_str = query.printable
+
+        (;sample_space, constraints, query_expression, query_vars) = parse_problem(facts, query)
+
+        if !all(query_vars .∈ Ref(sample_space.vars)) 
+             query_error = true
+             return
+        else
+            query_error = false
+        end
+
+        p = FactSimply.maxent(sample_space, constraints, query_expression)
+        p = round(clamp(p, 0.0, 1.0), digits=2)
+        answer_str = to_string(Fact(0, what_text, when_text, (min=p, max=p), false))
+
+        @show p
     end
 
     @onchange delete_fact_id begin
@@ -102,7 +87,6 @@ end
         @push facts
         num_facts = length(facts)
     end
-
 
     @onchange range_slider_val begin
         @info " range changed" range_slider_val
@@ -120,6 +104,7 @@ end
         assume_btn_clicked = false
         query_btn_clicked = false
         is_query = false
+        query_error = false
 
         feedback_str = ""
         latex_formula = raw""
@@ -162,10 +147,19 @@ function ui()
     # Add Bootstrap CSS
     Stipple.Layout.add_css("https://bootswatch.com/5/lumen/bootstrap.min.css")
     #Stipple.Layout.add_css("https://bootswatch.com/5/litera/bootstrap.min.css")
+
     # Add custom styles
     Stipple.Layout.add_css(custom_styles)
 
     [
+        dialog(:query_error, auto__close=true, no__shake=false, noesc=false,
+        [
+          card([
+            card_section(class="text-h6", "Invalid Query", style="margin-bottom: 5px; text-decoration: underline;"),
+            card_section(class="q-pt-none", "Query contains variables not found in assumptions")
+          ])
+        ]),
+
         section(class="facts-header-container", v__cloak=true, [
             row([
                 header(class="facts-header", [
@@ -219,13 +213,68 @@ function ui()
                 ]),
                 section(class="col facts-latex-container", [
                     h5("Implications", style="margin-bottom: 10px; text-decoration: underline;"),
-                    cell(class = "facts-item", latex":latex_formula"display), 
-                ]),
+                    #cell(class = "facts-item", latex":latex_formula"display), 
+                    cell(class = "facts-item", p("{{answer_str}}")), 
+                    ]),
             ]),
+            row([footer("", class = "bg-blue-1")])
         ]
-    
 end
 
+function layout(; title::String = "FactSimply",
+    meta::D = Dict(),
+    head_content::Union{AbstractString, Vector} = "",
+    core_theme::Bool = true) where {D <:AbstractDict}
+    tags = Genie.Renderers.Html.for_each(x -> """<meta name="$(string(x.first))" content="$(string(x.second))">\n""", meta)
+    """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="utf-8">
+    $tags
+    <% Stipple.sesstoken() %>
+    <title>$title</title>
+    <% if isfile(joinpath(Genie.config.server_document_root, "css", "genieapp.css")) %>
+    <link rel='stylesheet' href='$(Genie.Configuration.basepath())/css/genieapp.css'>
+    <% else %>
+    <% end %>
+    <style>
+    ._genie_logo {
+    background:url('https://genieframework.com/logos/genie/logo-simple-with-padding.svg') no-repeat;
+    background-size:40px;
+    padding-top:22px;
+    padding-right:10px;
+    color:transparent !important;
+    font-size:9pt;
+    }
+    ._genie .row .col-12 { width:50%; margin:auto; }
+    </style>
+    $(join(head_content, "\n    "))
+    </head>
+    <body>
+    <div class='container'>
+    <div class='row'>
+    <div class='col-12'>
+    <% Stipple.page(model, partial = true, v__cloak = true, [Stipple.Genie.Renderer.Html.@yield], Stipple.@if(:isready); core_theme = $core_theme) %>
+    </div>
+    </div>
+    </div>
+    <% if isfile(joinpath(Genie.config.server_document_root, "js", "genieapp.js")) %>
+    <script src='$(Stipple.Genie.Configuration.basepath())/js/genieapp.js'></script>
+    <% else %>
+    <% end %>
+    <% if isfile(joinpath(Genie.config.server_document_root, "css", "theme.css")) %>
+    <link rel='stylesheet' href='$(Genie.Configuration.basepath())/css/theme.css'>
+    <% else %>
+    <% end %>
+    <% if isfile(joinpath(Genie.config.server_document_root, "css", "autogenerated.css")) %>
+    <link rel='stylesheet' href='$(Genie.Configuration.basepath())/css/autogenerated.css'>
+    <% else %>
+    <% end %>
+    </body>
+    </html>
+    """
+end
 
-@page("/", ui)
+@page("/", ui, layout=layout(); debounce = 200)
 end
