@@ -12,7 +12,7 @@ using StippleUI
     @private id = 1
     @in what_text = ""
     @in when_text = ""
-    @in range_slider_val =  RangeData(0:20)
+    @in range_slider_val =  RangeData(0:100)
     
     @in assume_btn_clicked = false
     @in query_btn_clicked = false
@@ -31,7 +31,8 @@ using StippleUI
     @private prob_range = (min=0.0, max=1.0)
     @out facts = Fact[]  
     @out num_facts = 0  
-    @out answer_str = ""
+    @out maxent_answer_str = ""
+    @out bounds_answer_str = ""
     
     @onchange what_text begin
         fact = Fact(id, what_text, when_text, prob_range, is_query)
@@ -57,6 +58,7 @@ using StippleUI
         #latex_formula = raw"\begin{align} a &=b+c \\ d+e &=f \end{align}"
 
         num_facts = length(facts)
+        @show num_facts
         
     end
 
@@ -76,16 +78,32 @@ using StippleUI
         end
 
         p = FactSimply.maxent(sample_space, constraints, query_expression)
-        p = round(clamp(p, 0.0, 1.0), digits=2)
-        answer_str = to_string(Fact(0, what_text, when_text, (min=p, max=p), false))
-
         @show p
+        if !isnothing(p)
+            p = round(clamp(p, 0.0, 1.0), digits=2)
+            maxent_answer_str = to_string(Fact(0, what_text, when_text, (min=p, max=p), false))
+        else
+            maxent_answer_str = "Maximum Entropy solver returned status other than OPTIMAl"
+        end
+
+        p = FactSimply.compute_bounds(sample_space, constraints, query_expression)
+        @show p
+        if !isnothing(p)
+            p = round.(clamp.(p, 0.0, 1.0), digits=2)
+            bounds_answer_str = to_string(Fact(0, what_text, when_text, (min=p[1], max=p[2]), false))
+        else
+            bounds_answer_str = "Bounds solver returned status other than OPTIMAl"
+        end
+
     end
 
     @onchange delete_fact_id begin
+        @show [f.id for f in facts]
         filter!(f -> f.id != delete_fact_id, facts)
         @push facts
         num_facts = length(facts)
+        @show [f.id for f in facts]
+        @show num_facts
     end
 
     @onchange range_slider_val begin
@@ -100,7 +118,7 @@ using StippleUI
         id = 1
         what_text = ""
         when_text = ""
-        range_slider_val =  RangeData(0:20)
+        range_slider_val =  RangeData(0:100)
         assume_btn_clicked = false
         query_btn_clicked = false
         is_query = false
@@ -108,6 +126,8 @@ using StippleUI
 
         feedback_str = ""
         latex_formula = raw""
+        maxent_answer_str = ""
+        bounds_answer_str = ""
 
         process_new_fact = false  
         clear_completed = false  
@@ -171,18 +191,19 @@ function ui()
         section(class="facts-container facts-input", [
             row([
             # Input field for new facts, bound to new_facts variable
-                input(class="facts-text col-3", placeholder="The joint event (e.g., 'A, !B')", @bind(:what_text)),
+                input(class="facts-text col-2", placeholder="The joint event (e.g., 'A, !B')", @bind(:what_text)),
                 cell(class="col-1", p("conditioned on", style="text-align: center; font-weight: bold;")),
-                input(class="facts-text col-3", placeholder="the joint conditions (e.g., '!A, !C')", @bind(:when_text)),
+                input(class="facts-text col-2", placeholder="the joint conditions (e.g., '!A, !C')", @bind(:when_text)),
                 p(class="col-2", " has probability in the range: ", style="font-weight: bold;"),
             
-                cell(class="col-2",   range(0:5:100, 
+                cell(class="col-3",   range(0:1:100, 
                             :range_slider_val;
                             snap=true,
                             labelalways=true,
                             label=true,
                             dragrange=true,
                             dense=true,
+                            reverse=false,
                             thumb__color="blue-13",
                             thumb__size="55px",
                             switch__label__side = true,
@@ -203,7 +224,7 @@ function ui()
           
             row([
                 section(class="col facts-list-container", [
-                    h5("Facts", style="margin-bottom: 10px; text-decoration: underline;"),
+                    h4("Facts", style="margin-bottom: 10px; text-decoration: underline;"),
                     ul(class="facts-list", [
                         li(class="facts-item", @recur("fact in facts"), [
                             p("{{fact.printable}}", style="margin: 0;"),
@@ -212,9 +233,12 @@ function ui()
                     ])
                 ]),
                 section(class="col facts-latex-container", [
-                    h5("Implications", style="margin-bottom: 10px; text-decoration: underline;"),
+                    h4("Implications", style="margin-bottom: 10px; text-decoration: underline;"),
                     #cell(class = "facts-item", latex":latex_formula"display), 
-                    cell(class = "facts-item", p("{{answer_str}}")), 
+                    h6("The maximum entropy probability", style="margin-top: 20px; font-weight: bold;"),
+                    cell(class = "facts-item", p("{{maxent_answer_str}}")), 
+                    h6("The maximum entropy probability", style="margin-top: 10px; font-weight: bold;"),
+                    cell(class = "facts-item", p("{{maxent_answer_str}}")), 
                     ]),
             ]),
             row([footer("", class = "bg-blue-1")])

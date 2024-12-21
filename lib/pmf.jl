@@ -66,11 +66,15 @@ function maxent(ss::SampleSpace,
     end
     @objective(model, Min, sum(log.(pmf_table[i]) .* pmf_table[i] for i in ss.var_index))
     optimize!(model)
+    @show termination_status(model), JuMP.OPTIMAL
+    termination_status(model) == JuMP.OPTIMAL || termination_status(model) == JuMP.LOCALLY_SOLVED || return nothing
+
     maxent_pmf_table = value.(pmf_table)
     query_prob = prob(query, maxent_pmf_table, ss)
+    @show ">>>>>>>>>>>>>>>>>>>>>>>>>> Max Ent"
     @show solution_summary(model)
-    @show "=="
-    print(maxent_pmf_table)
+    
+    #print(maxent_pmf_table)
     return query_prob
 end
 
@@ -97,9 +101,25 @@ function compute_bounds(ss::SampleSpace,
     optimize!(model)
     lb = objective_value(model)
 
+   @show ">>>>>>>>>>>>>>>>>>>>>>>>>> LB"
+    @show solution_summary(model)
+    optimal_solve = true
+    termination_status(model) == JuMP.OPTIMAL || (optimal_solve = false)
+
     @objective(model, Max, query_prob)
     optimize!(model)
     ub = objective_value(model)
 
-    return (lb, ub)
+    @show "UB"
+    @show solution_summary(model)
+    
+    termination_status(model) == JuMP.OPTIMAL || (optimal_solve = false)
+
+    if optimal_solve
+        p = [lb, ub]
+    else
+        p = nothing
+    end
+
+    return p
 end
