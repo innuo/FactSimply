@@ -33,6 +33,7 @@ ENV GENIE_HOST "0.0.0.0"
 ENV PORT "8000"
 ENV WSPORT "8000"
 ENV EARLYBIND "true"
+ENV HOSTNAME "0.0.0.0"
 
 # run app
 CMD ["bin/server"]
