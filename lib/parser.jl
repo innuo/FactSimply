@@ -29,12 +29,15 @@ function parse_problem(facts, query)
     constraints = PMFConstraint[]
 
     for f in facts
+        @show "----------"
+        @show f
         pe = probability_expression(f)
         push!(all_vars, vars(pe)...)
         if f.prob_range.max - f.prob_range.min < 0.01
             constraint = PMFConstraint(lhs=pe, rhs=f.prob_range.min, direction=eq)
             push!(constraints, constraint)
         else
+            @show pe, f.prob_range
             constraint = PMFConstraint(lhs=pe, rhs=f.prob_range.min, direction=geq)
             push!(constraints, constraint)
             constraint = PMFConstraint(lhs=pe, rhs=f.prob_range.max, direction=leq)

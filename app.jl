@@ -48,12 +48,15 @@ using StippleUI
         is_query = false
         query_error = false
         fact = Fact(id, what_text, when_text, prob_range, is_query)
+        @show "-------------"
+        @show fact
         feedback_str = fact.printable
 
         length(parse_input(what_text).vals) == 0 && return # nothing in the text field
 
         id += 1
-        push!(facts, fact)
+        push!(facts, deepcopy(fact))
+
         @push facts
         #latex_formula = raw"\begin{align} a &=b+c \\ d+e &=f \end{align}"
 
@@ -67,6 +70,9 @@ using StippleUI
         is_query = true
         query = Fact(0, what_text, when_text, (min=0.0, max=1.0), is_query)
         feedback_str = query.printable
+
+        @show "xxxxxxxxxxxxxxxxxxx"
+        @show facts
 
         (;sample_space, constraints, query_expression, query_vars) = parse_problem(facts, query)
 
@@ -83,10 +89,11 @@ using StippleUI
             p = round(clamp(p, 0.0, 1.0), digits=2)
             maxent_answer_str = to_string(Fact(0, what_text, when_text, (min=p, max=p), false))
         else
-            maxent_answer_str = "Maximum Entropy solver returned status other than OPTIMAl"
+            maxent_answer_str = "Maximum Entropy solver returned status other than OPTIMAL"
         end
 
-        p = FactSimply.compute_bounds(sample_space, constraints, query_expression)
+        #p = FactSimply.compute_bounds(sample_space, constraints, query_expression)
+        p = nothing
         @show p
         if !isnothing(p)
             p = round.(clamp.(p, 0.0, 1.0), digits=2)

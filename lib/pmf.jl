@@ -74,7 +74,7 @@ function maxent(ss::SampleSpace,
     @show ">>>>>>>>>>>>>>>>>>>>>>>>>> Max Ent"
     @show solution_summary(model)
     
-    #print(maxent_pmf_table)
+    print(model)
     return query_prob
 end
 
