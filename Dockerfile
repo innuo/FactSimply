@@ -19,8 +19,11 @@ RUN chmod +x bin/runtask
 # switch user
 USER genie
 
+ENV HOSTNAME="0.0.0.0"
+
 # instantiate Julia packages
 RUN julia -e "using Pkg; Pkg.activate(\".\"); Pkg.instantiate(); Pkg.precompile(); "
+
 
 # ports
 EXPOSE 8000
@@ -28,12 +31,12 @@ EXPOSE 80
 
 # set up app environment
 ENV JULIA_DEPOT_PATH "/home/genie/.julia"
-ENV GENIE_ENV "dev"
-ENV GENIE_HOST "0.0.0.0"
-ENV PORT "8000"
-ENV WSPORT "8000"
-ENV EARLYBIND "true"
-ENV HOSTNAME "0.0.0.0"
+ENV GENIE_ENV="dev"
+ENV GENIE_HOST="0.0.0.0"
+ENV PORT="8000"
+ENV WSPORT="8000"
+ENV EARLYBIND="true"
+
 
 # run app
 CMD ["bin/server"]
