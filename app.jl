@@ -33,6 +33,8 @@ using StippleUI
     @out num_facts = 0  
     @out maxent_answer_str = ""
     @out bounds_answer_str = ""
+
+    @out show_help=false
     
     @onchange what_text begin
         fact = Fact(id, what_text, when_text, prob_range, is_query)
@@ -71,17 +73,20 @@ using StippleUI
         query = Fact(0, what_text, when_text, (min=0.0, max=1.0), is_query)
         feedback_str = query.printable
 
-        @show "xxxxxxxxxxxxxxxxxxx"
-        @show facts
-
         (;sample_space, constraints, query_expression, query_vars) = parse_problem(facts, query)
 
+        @show sample_space.vars, length(sample_space.vars)
+        (length(sample_space.vars) == 0) && return
+
+        @show query_vars
         if !all(query_vars .∈ Ref(sample_space.vars)) 
              query_error = true
+             @show "query error"
              return
         else
             query_error = false
         end
+
 
         p = FactSimply.maxent(sample_space, constraints, query_expression)
         @show p
@@ -111,6 +116,7 @@ using StippleUI
         num_facts = length(facts)
         @show [f.id for f in facts]
         @show num_facts
+        delete_fact_id[!] = 0 
     end
 
     @onchange range_slider_val begin
@@ -119,6 +125,9 @@ using StippleUI
         fact.prob_range = prob_range
         feedback_str = to_string(fact)
         @show prob_range
+    end
+
+    @onbutton show_help begin
     end
 
     @onbutton clear_btn_clicked  begin
@@ -130,6 +139,7 @@ using StippleUI
         query_btn_clicked = false
         is_query = false
         query_error = false
+        show_help=false
 
         feedback_str = ""
         latex_formula = raw""
@@ -165,6 +175,9 @@ function custom_styles()
         .facts-item label { margin-left: 10px; flex-grow: 1; }
         .facts-item button { padding: 2px 8px; }
         .btn-delete_fact_id { margin-left: auto; margin-right: 0; color: red; border-radius: 8px; background-color: #f8f9fa;}
+        .fact_help { color: var(--bs-primary); } 
+        .fact_help:hover { color: #3596fa; }'
+        .help-card {width: 100%; max-width: 250px}
         [v-cloak] { display: none; }
     </style>
     """]
@@ -173,8 +186,7 @@ end
 function ui()
     # Add Bootstrap CSS
     Stipple.Layout.add_css("https://bootswatch.com/5/lumen/bootstrap.min.css")
-    #Stipple.Layout.add_css("https://bootswatch.com/5/litera/bootstrap.min.css")
-
+    
     # Add custom styles
     Stipple.Layout.add_css(custom_styles)
 
@@ -187,17 +199,26 @@ function ui()
           ])
         ]),
 
-        section(class="facts-header-container", v__cloak=true, [
+        dialog(:show_help, position="top", persistent=false, auto__close=true, no__shake=true, noesc=false,
+        [
+            card(class = "help-card", bordered = true, flat=true, [
+                card_section(class="text-h5", "What is this tool for?", style="text-align: center;  color: var(--bs-primary); margin-bottom: 0px; margin-top=0px"),
+                separator(),
+                card_section(helpmsg())
+            ])
+        ]),
+
+        section(class="facts-header-container", v__cloak=false, [
             row([
                 header(class="facts-header", [
-                    h1("FactSimply: What Do Your Beliefs Imply?", style="margin-bottom: 20px; text-decoration: underline;")
+                    h1("<a class='fact_help' v-on:click='show_help=true'>FactSimply: What Do Your Beliefs Imply?</a>", @click("show_help=true"), style="margin-bottom: 20px; text-decoration: underline;"),
                 ]),        
-            ])
+            ]),
+
         ]),
         
         section(class="facts-container facts-input", [
             row([
-            # Input field for new facts, bound to new_facts variable
                 input(class="facts-text col-2", placeholder="The joint event (e.g., 'A, !B')", @bind(:what_text)),
                 cell(class="col-1", p("conditioned on", style="text-align: center; font-weight: bold;")),
                 input(class="facts-text col-2", placeholder="the joint conditions (e.g., '!A, !C')", @bind(:when_text)),
@@ -215,32 +236,32 @@ function ui()
                             thumb__size="55px",
                             switch__label__side = true,
                             switch__marker__labels__side = true,
-                            labelvalueleft=Symbol("'Min = ' + range_slider_val.min/100.0"),
-                            labelvalueright=Symbol("'Max = ' + range_slider_val.max/100.0"),
+                            labelvalueleft=Symbol("range_slider_val.min/100.0"),
+                            labelvalueright=Symbol("range_slider_val.max/100.0"),
                          )),
 
                         p("{{feedback_str}}", style="margin-left: 10px; font-weight: bold;"),
                 ]),
                 
                 row([
-                    cell(class="col-1 btn-fact",button("Assume", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterAll }", @click(:assume_btn_clicked ))),
-                    cell(class="col-1 btn-fact", button("Query", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterActive }", @click(:query_btn_clicked ))),
-                    cell(class="col-2 btn-fact", style="margin-right: 0; margin-left: auto;", button("Clear & Restart", class="btn btn-outline-primary", (class!)="{ 'btn-focused' : filterActive }", @click(:clear_btn_clicked ))),
+                    cell(class="col-1 btn-fact",button("Assume", class="btn btn-primary", (class!)="{ 'btn-focused' : filterAll }", @click(:assume_btn_clicked ))),
+                    cell(class="col-1 btn-fact", button("Query", class="btn btn-primary", (class!)="{ 'btn-focused' : filterActive }", @click(:query_btn_clicked ))),
+                    cell(class="col-2 btn-fact", style="margin-right: 0; margin-left: auto;", button("Clear & Restart", class="btn btn-primary", (class!)="{ 'btn-focused' : filterActive }", @click(:clear_btn_clicked ))),
                     ]),                   
             ]),
           
             row([
                 section(class="col facts-list-container", [
-                    h4("Facts", style="margin-bottom: 10px; text-decoration: underline;"),
+                    h4("Facts", style="margin-bottom: 10px; text-decoration: underline; color: var(--bs-primary);"),
                     ul(class="facts-list", [
                         li(class="facts-item", @recur("fact in facts"), [
                             p("{{fact.printable}}", style="margin: 0;"),
-                            button("×", class="btn-delete_fact_id", outline=true,color = "red", @on("click", "delete_fact_id = fact.id"))
+                            button("×", class="btn-delete_fact_id", outline=true, color = "red", @on("click", "delete_fact_id = fact.id"))
                         ])
                     ])
                 ]),
                 section(class="col facts-latex-container", [
-                    h4("Implications", style="margin-bottom: 10px; text-decoration: underline;"),
+                    h4("Implications", style="margin-bottom: 10px; text-decoration: underline; color: var(--bs-primary);"),
                     #cell(class = "facts-item", latex":latex_formula"display), 
                     h6("The maximum entropy probability", style="margin-top: 20px; font-weight: bold;"),
                     cell(class = "facts-item", p("{{maxent_answer_str}}")), 
@@ -305,6 +326,23 @@ function layout(; title::String = "FactSimply",
     </body>
     </html>
     """
+end
+
+
+function helpmsg()
+   [
+    p("A great mind once declared that a foolish consistency is the hobgoblin of little minds. 
+    He probably right away followed that by its exact opposite, so we can safely ignore him."),
+    
+    p("Other, more medium sized minds are troubled sometimes by the possibility of an inconsistency 
+    in their beliefs, and wonder what else those beliefs might imply. 
+    This tool in some small measure attempts to allay those worries."), 
+
+    h6("Probabilistic Statements and Their Implications"),
+
+    p(@latex(raw"The basic idea is of the tool is to enable specifying probabilities of joint specification 
+    of certain variables conditioned on the joint specification of other variables. E.g.  $p(A = true| C=false, B=true) = 0.4$ "))
+   ]
 end
 
 @page("/", ui, layout=layout(); debounce = 200)
