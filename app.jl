@@ -177,7 +177,7 @@ function custom_styles()
         .btn-delete_fact_id { margin-left: auto; margin-right: 0; color: red; border-radius: 8px; background-color: #f8f9fa;}
         .fact_help { color: var(--bs-primary); } 
         .fact_help:hover { color: #3596fa; }'
-        .help-card {width: 100%; max-width: 250px}
+        .help-card {width: 100%; max-width: 350px}
         [v-cloak] { display: none; }
     </style>
     """]
@@ -202,7 +202,7 @@ function ui()
         dialog(:show_help, position="top", persistent=false, auto__close=true, no__shake=true, noesc=false,
         [
             card(class = "help-card", bordered = true, flat=true, [
-                card_section(class="text-h5", "What is this tool for?", style="text-align: center;  color: var(--bs-primary); margin-bottom: 0px; margin-top=0px"),
+                card_section(class="text-h5", "What Is This Tool For?", style="text-align: center;  color: var(--bs-primary); margin-bottom: 0px; margin-top=0px"),
                 separator(),
                 card_section(helpmsg())
             ])
@@ -338,10 +338,17 @@ function helpmsg()
     in their beliefs, and wonder what else those beliefs might imply. 
     This tool in some small measure attempts to allay those worries."), 
 
-    h6("Probabilistic Statements and Their Implications"),
+    h6("Probabilistic Statements and Their Implications", style="margin-bottom: 10px;"),
 
-    p(@latex(raw"The basic idea is of the tool is to enable specifying probabilities of joint specification 
-    of certain variables conditioned on the joint specification of other variables. E.g.  $p(A = true| C=false, B=true) = 0.4$ "))
+    p(latex"The basic idea is of the tool is to enable specifying probabilities of joint specifications 
+    of certain variables conditioned on the joint specification of other variables, e.g.,  \(P(A=true | C=false, B=true) = 0.4\), 
+    and querying the probability of other such predicates, \(P(C=true | A=true) = ?\)"auto),
+
+    p("The query is answered in two different ways: the first asks, of all probability distributions that 
+    agree with the assumptions specified, what is the smallest and the largest probability that can be assigned
+    to the query, and the second asks of all the probability distributions that agree, what probability does
+    the flattest one assign to the query, viz., the Maximum Entropy estimate.")
+
    ]
 end
 
