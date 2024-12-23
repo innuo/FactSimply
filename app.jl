@@ -340,7 +340,7 @@ function helpmsg()
 
     h6("Probabilistic Statements and Their Implications", style="margin-bottom: 10px;"),
 
-    p(latex"The basic idea is of the tool is to enable specifying probabilities of joint specifications 
+    p(latex"The basic function of the tool is to enable specifying probabilities of joint specifications 
     of certain variables conditioned on the joint specification of other variables, e.g.,  \(P(A=true | C=false, B=true) = 0.4\), 
     and querying the probability of other such predicates, \(P(C=true | A=true) = ?\)"auto),
 
