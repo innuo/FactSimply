@@ -13,6 +13,8 @@ using StippleUI
     @in what_text = ""
     @in when_text = ""
     @in range_slider_val =  RangeData(0:100)
+    @in prob_scale = "Linear"
+    @out range_label_left = 
     
     @in assume_btn_clicked = false
     @in query_btn_clicked = false
@@ -104,7 +106,7 @@ using StippleUI
             p = round.(clamp.(p, 0.0, 1.0), digits=2)
             bounds_answer_str = to_string(Fact(0, what_text, when_text, (min=p[1], max=p[2]), false))
         else
-            bounds_answer_str = "Bounds solver returned status other than OPTIMAl"
+            bounds_answer_str = "Bounds solver returned status other than OPTIMAL"
         end
 
     end
@@ -223,7 +225,6 @@ function ui()
                 cell(class="col-1", p("conditioned on", style="text-align: center; font-weight: bold;")),
                 input(class="facts-text col-2", placeholder="the joint conditions (e.g., '!A, !C')", @bind(:when_text)),
                 p(class="col-2", " has probability in the range: ", style="font-weight: bold;"),
-            
                 cell(class="col-3",   range(0:1:100, 
                             :range_slider_val;
                             snap=true,
@@ -236,11 +237,28 @@ function ui()
                             thumb__size="55px",
                             switch__label__side = true,
                             switch__marker__labels__side = true,
-                            labelvalueleft=Symbol("range_slider_val.min/100.0"),
-                            labelvalueright=Symbol("range_slider_val.max/100.0"),
+                            #labelvalueleft=Symbol("range_slider_val.min/100.0"),
+                            #labelvalueright=Symbol("range_slider_val.max/100.0"),
+                            labelvalueleft=Symbol("Math.log(range_slider_val.min + 1)"),
+                            labelvalueright=Symbol("Math.log(range_slider_val.max)"),
                          )),
+                         Html.div( style="max-width: 100px", select(
+                            :prob_scale;
+                            #label = "Scale",
+                            clearable=false,
+                            behavior="menu",
+                            fill__input=true,
+                            options = ["Linear", "Log"],
+                            stack__label=true,
+                            use__input = false,
+                            emit__value=true,
+                            dense=false,
+                            multiple=false,
+                            disable=false,
+                        )),
 
                         p("{{feedback_str}}", style="margin-left: 10px; font-weight: bold;"),
+                        
                 ]),
                 
                 row([
@@ -263,7 +281,7 @@ function ui()
                 section(class="col facts-latex-container", [
                     h4("Implications", style="margin-bottom: 10px; text-decoration: underline; color: var(--bs-primary);"),
                     #cell(class = "facts-item", latex":latex_formula"display), 
-                    h6("The maximum entropy probability", style="margin-top: 20px; font-weight: bold;"),
+                    h6("Bounds on the probability", style="margin-top: 20px; font-weight: bold;"),
                     cell(class = "facts-item", p("{{maxent_answer_str}}")), 
                     h6("The maximum entropy probability", style="margin-top: 10px; font-weight: bold;"),
                     cell(class = "facts-item", p("{{maxent_answer_str}}")), 
@@ -332,7 +350,7 @@ end
 function helpmsg()
    [
     p("A great mind once declared that a foolish consistency is the hobgoblin of little minds. 
-    He probably right away followed that by its exact opposite, so we can safely ignore him."),
+    He probably followed that right away by its exact opposite, so we can safely ignore him."),
     
     p("Other, more medium sized minds are troubled sometimes by the possibility of an inconsistency 
     in their beliefs, and wonder what else those beliefs might imply. 
@@ -340,15 +358,28 @@ function helpmsg()
 
     h6("Probabilistic Statements and Their Implications", style="margin-bottom: 10px;"),
 
-    p(latex"The basic function of the tool is to enable specifying probabilities of joint specifications 
+    p(latex"The basic function of this tool is to enable positing the probability of joint specifications 
     of certain variables conditioned on the joint specification of other variables, e.g.,  \(P(A=true | C=false, B=true) = 0.4\), 
-    and querying the probability of other such predicates, \(P(C=true | A=true) = ?\)"auto),
+    and querying the probability of other such predicates, e.g., \(P(C=true | A=true) = ?\). Any number of such probabilistic
+    assumptions can be made before a query. Moreover, instead of an exact equality, the probability of
+    an assumption can be specified to lie in a range of values."auto),
 
-    p("The query is answered in two different ways: the first asks, of all probability distributions that 
+    p("The query is answered in two different ways. The first asks \"of all probability distributions that 
     agree with the assumptions specified, what is the smallest and the largest probability that can be assigned
-    to the query, and the second asks of all the probability distributions that agree, what probability does
-    the flattest one assign to the query, viz., the Maximum Entropy estimate.")
+    to the query?\", and the second asks \"of all the probability distributions that agree with the assumptions, what probability does
+    the 'flattest' one assign to the query?\" -- the so-called <em> Maximum Entropy estimate </em> ."),
+    
+    h6("How To Use", style="margin-bottom: 10px;"),
 
+    p("The joint and conditional specification of the event are entered into the two text boxes resp., and the 
+    probability range is specified. If the assume button is clicked the probabilistic statement is
+    added to the set of assumptions."),
+
+    p("The joint event is specified by typing in variables separated by commas. A '!' before a variable
+    indicates that it is set to false. For example '{A, !B, C}' would specify '{A=true, B=false, C=true}'"),
+
+
+    h6("Example Uses", style="margin-bottom: 10px;"),
    ]
 end
 

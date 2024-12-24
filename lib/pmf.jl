@@ -25,8 +25,6 @@ end
 function prob(joint_spec::JointSpec, pmf_table, ss::SampleSpace)
     isempty(joint_spec) && return 1.0
     idx_vec = [s for s in ss.var_index if agrees(s, joint_spec)]
-    #Main.@infiltrate
-    @show idx_vec
     return sum(pmf_table[idx] for idx in idx_vec)
 end
 
