@@ -12,10 +12,8 @@ using StippleUI
     @private id = 1
     @in what_text = ""
     @in when_text = ""
-    @out pmin = 0.0
-    @out pmax = 1.0
-    @in prob_scale = "Linear"
-    @out range_label_left = 
+    @in pmin = 0.0
+    @in pmax = 1.0
     
     @in assume_btn_clicked = false
     @in query_btn_clicked = false
@@ -31,7 +29,7 @@ using StippleUI
     @out fact = Fact(0, "", "", (min=0.0, max=1.0), false, "")
     @out feedback_str = ""
     
-    @private prob_range = (min=0.0, max=1.0)
+    @out prob_range = (min=0.0, max=1.0)
     @out facts = Fact[]  
     @out num_facts = 0  
     @out maxent_answer_str = ""
@@ -44,6 +42,10 @@ using StippleUI
         feedback_str = fact.printable
     end 
     @onchange when_text begin
+        fact = Fact(id, what_text, when_text, prob_range, is_query)
+        feedback_str = fact.printable
+    end
+    @onchange prob_range begin
         fact = Fact(id, what_text, when_text, prob_range, is_query)
         feedback_str = fact.printable
     end
@@ -123,13 +125,13 @@ using StippleUI
     end
 
     @onchange pmin begin
-        m = clamp(pmin, 0.0, pmax)
-        prob_range = (min=m, max=pmax)
+        pmin_clamped = clamp(pmin, 0.0, pmax)
+        prob_range = (min=pmin_clamped, max=pmax)
     end
 
     @onchange pmax begin
-        M = clamp(pmax, pmin, 1.0)
-        prob_range = (min=pmin, max=M)
+        pmax_clamped = clamp(pmax, pmin, 1.0)
+        prob_range = (min=pmin, max=pmax_clamped)
     end
 
     @onbutton show_help begin end
@@ -190,7 +192,7 @@ end
 
 function ui()
     # Add Bootstrap CSS
-    Stipple.Layout.add_css("https://bootswatch.com/5/materia/bootstrap.min.css")
+    Stipple.Layout.add_css("https://bootswatch.com/5/lumen/bootstrap.min.css")
     
     # Add custom styles
     Stipple.Layout.add_css(custom_styles)
@@ -231,23 +233,23 @@ function ui()
                     textfield("", :when_text, placeholder="The joint event (e.g., 'A, !B')"), style="padding-left:20px"),
                 cell(class="col-2",  style="margin-top: 20px; max-width: 200px", span("has probability in the range: ", style="font-weight: bold;")),
                 
-                cell(class="col-2",  style="margin-top: 0px; max-width: 120px;margin-right:2px; padding-right:2px", 
+                cell(class="col-2",  style="margin-top: 0px; max-width: 130px;margin-right:2px; margin-left:5px; padding-right:2px", 
                     numberfield("", :pmin,
-                    style="padding-left:0px; width=120px",
+                    style="padding-left:0px; width=130px",
                     borderless = true, dense=true,  
                     hint = "Min", noerroricon=true,
-                    min="0.0", step = "0.1", max= "1.0", 
-                    #rules= "[ val => (parseFloat(val) >= 0.0 ) || 'Invalid probability' ]",
-                    placeholder="{{pmin}}")),
+                    min="0.0", step = "0.1", max= Symbol("prob_range.max"), 
+                    rules= "[ val => parseFloat(val) >= 0.0 && parseFloat(val) <= 1.0 || 'Invalid probability' ]",
+                    placeholder="{{prob_range.min}}")),
 
-                cell(class="col-2",  style="margin-top: 0px; max-width: 120px; padding-left:2px; margin-left:2px", 
+                cell(class="col-2",  style="margin-top: 0px; max-width: 130px; padding-left:2px; margin-left:2px", 
                     numberfield("", :pmax,
-                    style="padding-left:0px; width=120px",
+                    style="padding-left:0px; width=130px",
                     borderless = true, dense=true,  
                     hint = "Max", noerroricon=true,
-                    min="0.0", step = "0.1", max= "1.0", 
-                    #rules= "[ val => (parseFloat(val) >= 0.0) || 'Invalid probability' ]",
-                    placeholder="{{pmax}}")),
+                    min=Symbol("prob_range.min"), step = "0.1", max= "1.0", 
+                    rules= "[ val => parseFloat(val) >= 0.0 && parseFloat(val) <= 1.0 || 'Invalid probability' ]",
+                    placeholder="{{prob_range.max}}")),
 
                 p("{{feedback_str}}", style="margin-left: 10px; font-weight: bold;"),
                         
