@@ -12,7 +12,8 @@ using StippleUI
     @private id = 1
     @in what_text = ""
     @in when_text = ""
-    @in range_slider_val =  RangeData(0:100)
+    @out pmin = 0.0
+    @out pmax = 1.0
     @in prob_scale = "Linear"
     @out range_label_left = 
     
@@ -121,22 +122,24 @@ using StippleUI
         delete_fact_id[!] = 0 
     end
 
-    @onchange range_slider_val begin
-        @info " range changed" range_slider_val
-        prob_range = (min=first(range_slider_val.range)/100.0, max=last(range_slider_val.range)/100.0)
-        fact.prob_range = prob_range
-        feedback_str = to_string(fact)
-        @show prob_range
+    @onchange pmin begin
+        m = clamp(pmin, 0.0, pmax)
+        prob_range = (min=m, max=pmax)
     end
 
-    @onbutton show_help begin
+    @onchange pmax begin
+        M = clamp(pmax, pmin, 1.0)
+        prob_range = (min=pmin, max=M)
     end
+
+    @onbutton show_help begin end
 
     @onbutton clear_btn_clicked  begin
         id = 1
         what_text = ""
         when_text = ""
-        range_slider_val =  RangeData(0:100)
+        pmin = 0.0
+        pmax = 1.0
         assume_btn_clicked = false
         query_btn_clicked = false
         is_query = false
@@ -165,10 +168,10 @@ function custom_styles()
     ["""
     <style>
         body { background-color: #f4f4f4; }
-        .facts-container {background: white; padding: 5px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .facts-container {background: white; padding: 5px; border-radius: 8px; margin-bottom: 20px; }
         .facts-header-container { background: white; padding: 5px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .facts-header { text-align: center; color: #007bff; padding-bottom: 2px; }
-        .facts-input {background: white; padding: 5px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 20px;}
+        .facts-input {background: white; padding: 5px; border-radius: 8px;  margin-top: 20px;}
         .facts-text { padding: 5px; margin-bottom: 20px; margin-left: 20px; margin-right: 5px;  margin-top: 5px; }
         .facts-list { list-style-type: none; padding: 5px; }
         .facts-list-container {background: white; padding: 5px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-left: 10px; margin-right: auto; }
@@ -187,7 +190,7 @@ end
 
 function ui()
     # Add Bootstrap CSS
-    Stipple.Layout.add_css("https://bootswatch.com/5/lumen/bootstrap.min.css")
+    Stipple.Layout.add_css("https://bootswatch.com/5/materia/bootstrap.min.css")
     
     # Add custom styles
     Stipple.Layout.add_css(custom_styles)
@@ -219,45 +222,34 @@ function ui()
 
         ]),
         
-        section(class="facts-container facts-input", [
+        section(class="col-12 facts-container facts-input", [
             row([
-                input(class="facts-text col-2", placeholder="The joint event (e.g., 'A, !B')", @bind(:what_text)),
-                cell(class="col-1", p("conditioned on", style="text-align: center; font-weight: bold;")),
-                input(class="facts-text col-2", placeholder="the joint conditions (e.g., '!A, !C')", @bind(:when_text)),
-                p(class="col-2", " has probability in the range: ", style="font-weight: bold;"),
-                cell(class="col-3",   range(0:1:100, 
-                            :range_slider_val;
-                            snap=true,
-                            labelalways=true,
-                            label=true,
-                            dragrange=true,
-                            dense=true,
-                            reverse=false,
-                            thumb__color="blue-13",
-                            thumb__size="55px",
-                            switch__label__side = true,
-                            switch__marker__labels__side = true,
-                            #labelvalueleft=Symbol("range_slider_val.min/100.0"),
-                            #labelvalueright=Symbol("range_slider_val.max/100.0"),
-                            labelvalueleft=Symbol("Math.log(range_slider_val.min + 1)"),
-                            labelvalueright=Symbol("Math.log(range_slider_val.max)"),
-                         )),
-                         Html.div( style="max-width: 100px", select(
-                            :prob_scale;
-                            #label = "Scale",
-                            clearable=false,
-                            behavior="menu",
-                            fill__input=true,
-                            options = ["Linear", "Log"],
-                            stack__label=true,
-                            use__input = false,
-                            emit__value=true,
-                            dense=false,
-                            multiple=false,
-                            disable=false,
-                        )),
+                cell(class="col-3", 
+                    textfield("", :what_text, placeholder="The joint event (e.g., 'A, !B')"), style="padding-left:20px"),
+                cell(class="col-1",  style="margin-top: 20px; margin-left: 0px; max-width: 130px", span("conditioned on", style="text-align: center; font-weight: bold;")),
+                cell(class="col-3",   
+                    textfield("", :when_text, placeholder="The joint event (e.g., 'A, !B')"), style="padding-left:20px"),
+                cell(class="col-2",  style="margin-top: 20px; max-width: 200px", span("has probability in the range: ", style="font-weight: bold;")),
+                
+                cell(class="col-2",  style="margin-top: 0px; max-width: 120px;margin-right:2px; padding-right:2px", 
+                    numberfield("", :pmin,
+                    style="padding-left:0px; width=120px",
+                    borderless = true, dense=true,  
+                    hint = "Min", noerroricon=true,
+                    min="0.0", step = "0.1", max= "1.0", 
+                    #rules= "[ val => (parseFloat(val) >= 0.0 ) || 'Invalid probability' ]",
+                    placeholder="{{pmin}}")),
 
-                        p("{{feedback_str}}", style="margin-left: 10px; font-weight: bold;"),
+                cell(class="col-2",  style="margin-top: 0px; max-width: 120px; padding-left:2px; margin-left:2px", 
+                    numberfield("", :pmax,
+                    style="padding-left:0px; width=120px",
+                    borderless = true, dense=true,  
+                    hint = "Max", noerroricon=true,
+                    min="0.0", step = "0.1", max= "1.0", 
+                    #rules= "[ val => (parseFloat(val) >= 0.0) || 'Invalid probability' ]",
+                    placeholder="{{pmax}}")),
+
+                p("{{feedback_str}}", style="margin-left: 10px; font-weight: bold;"),
                         
                 ]),
                 
