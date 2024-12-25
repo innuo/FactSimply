@@ -26,7 +26,7 @@ end
 
 function parse_problem(facts, query)
     all_vars = Symbol[]
-    constraints = PMFConstraint[]
+    constraints = PMFConstraint{Float64}[]
 
     for f in facts
         @show "----------"

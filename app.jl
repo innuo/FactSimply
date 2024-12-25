@@ -92,9 +92,7 @@ using StippleUI
             query_error = false
         end
 
-
         p = FactSimply.maxent(sample_space, constraints, query_expression)
-        @show p
         if !isnothing(p)
             p = round(clamp(p, 0.0, 1.0), digits=5)
             maxent_answer_str = to_string(Fact(0, what_text, when_text, (min=p, max=p), false))
@@ -102,8 +100,7 @@ using StippleUI
             maxent_answer_str = "Maximum Entropy solver returned status other than OPTIMAL"
         end
 
-        #p = FactSimply.compute_bounds(sample_space, constraints, query_expression)
-        p = nothing
+        p = FactSimply.compute_bounds(sample_space, constraints, query_expression)
         @show p
         if !isnothing(p)
             p = round.(clamp.(p, 0.0, 1.0), digits=5)
@@ -276,7 +273,7 @@ function ui()
                     h4("Implications", style="margin-bottom: 10px; text-decoration: underline; color: var(--bs-primary);"),
                     #cell(class = "facts-item", latex":latex_formula"display), 
                     h6("Bounds on the probability", style="margin-top: 20px; font-weight: bold;"),
-                    cell(class = "facts-item", p("{{maxent_answer_str}}")), 
+                    cell(class = "facts-item", p("{{bounds_answer_str}}")), 
                     h6("The maximum entropy probability", style="margin-top: 10px; font-weight: bold;"),
                     cell(class = "facts-item", p("{{maxent_answer_str}}")), 
                     ]),

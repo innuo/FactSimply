@@ -44,3 +44,6 @@ end
 prob(pe::ProbabilityExpression, pmf_table, ss::SampleSpace) = 
         prob(pe.joint_spec, pe.condition_spec, pmf_table, ss)
 
+prob_terms(pe::ProbabilityExpression, pmf_table, ss::SampleSpace) = 
+        prob_terms(pe.joint_spec, pe.condition_spec, pmf_table, ss)
+

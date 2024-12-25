@@ -1,6 +1,4 @@
 using JuMP
-using Ipopt
-using Convex
 using SCS
 using HiGHS
 using Logging
@@ -42,9 +40,9 @@ end
 
 vars(pe::ProbabilityExpression) = unique([vars(pe.joint_spec); vars(pe.condition_spec)])
 
-Base.@kwdef mutable struct PMFConstraint{P<:Union{Float64,ProbabilityExpression}}
+Base.@kwdef mutable struct PMFConstraint{P}
     lhs::ProbabilityExpression
-    rhs::P
+    rhs::P #either a Float64 or ProbabilityExpression
     direction::Direction
     function PMFConstraint(lhs, rhs, direction)
         if rhs isa Float64
