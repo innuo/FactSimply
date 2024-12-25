@@ -96,7 +96,7 @@ using StippleUI
         p = FactSimply.maxent(sample_space, constraints, query_expression)
         @show p
         if !isnothing(p)
-            p = round(clamp(p, 0.0, 1.0), digits=2)
+            p = round(clamp(p, 0.0, 1.0), digits=5)
             maxent_answer_str = to_string(Fact(0, what_text, when_text, (min=p, max=p), false))
         else
             maxent_answer_str = "Maximum Entropy solver returned status other than OPTIMAL"
@@ -106,7 +106,7 @@ using StippleUI
         p = nothing
         @show p
         if !isnothing(p)
-            p = round.(clamp.(p, 0.0, 1.0), digits=2)
+            p = round.(clamp.(p, 0.0, 1.0), digits=5)
             bounds_answer_str = to_string(Fact(0, what_text, when_text, (min=p[1], max=p[2]), false))
         else
             bounds_answer_str = "Bounds solver returned status other than OPTIMAL"
