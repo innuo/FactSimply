@@ -1,5 +1,7 @@
 using JuMP
 using Ipopt
+using Convex
+using SCS
 using HiGHS
 using Logging
 
@@ -8,12 +10,15 @@ Base.@kwdef mutable struct JointSpec
 end
 
 JointSpec(vars::Vector{Symbol}, vals::BitVector) = JointSpec(vars, collect(vals))
+
 function JointSpec(vars::Vector{Symbol}, vals::Vector{Bool}) 
     (length(vars) == 0 || length(vals) == 0 || length(vars) != length(vals)) && return JointSpec()
     return JointSpec(Dict(vars .=> vals))
 end
 
+Base.isempty(js::JointSpec) = Base.isempty(js.spec)
 vars(js::JointSpec) = sort(collect(keys(js.spec)))
+vals(js::JointSpec) = getindex.(Ref(js.spec), vars(js))
 
 Base.@kwdef mutable struct SampleSpace
     n_var::Int = length(vars)

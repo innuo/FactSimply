@@ -1,12 +1,10 @@
 module FactSimply
+  using Genie
 
-using Genie
+  const up = Genie.up
+  export up
 
-const up = Genie.up
-export up
-
-function main()
-  Genie.genie(; context = @__MODULE__)
-end
-
+  function main()
+    Genie.genie(; context = @__MODULE__)
+  end
 end
