@@ -25,6 +25,11 @@ end
 function prob(joint_spec::JointSpec, pmf_table, ss::SampleSpace)
     isempty(joint_spec) && return 1.0
     idx_vec = [s for s in ss.var_index if agrees(s, joint_spec)]
+
+    @show "-----=-----------------"
+    @show joint_spec
+    @show idx_vec
+
     return sum(pmf_table[idx] for idx in idx_vec)
 end
 
@@ -54,16 +59,22 @@ function maxent(ss::SampleSpace,
     @variable(model, 0 <= pmf_table[ss.var_index] <= 1)
     @constraint(model, sum(pmf_table[i] for i in ss.var_index) == 1.0)
     for c in constraints
-        if c.direction == eq 
-            @constraint(model, prob(c.lhs, pmf_table, ss) == prob(c.rhs, pmf_table, ss))
+        @show "xxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        @show c
+        terms = term_wise_prob(c, pmf_table, ss)
+        @show terms
+        if terms.direction == eq 
+            @constraint(model, terms.num == terms.rhs * terms.den)
         elseif c.direction == leq 
-            @constraint(model, prob(c.lhs, pmf_table, ss) <= prob(c.rhs, pmf_table, ss))
+            @constraint(model, terms.num <= terms.rhs * terms.den)
         else
-            @constraint(model, prob(c.lhs, pmf_table, ss) >= prob(c.rhs, pmf_table, ss))           
+            @constraint(model, terms.num >= terms.rhs * terms.den)         
         end
     end
     @objective(model, Min, sum(log.(pmf_table[i]) .* pmf_table[i] for i in ss.var_index))
     optimize!(model)
+    print(model)
+
     @show termination_status(model), JuMP.OPTIMAL
     termination_status(model) == JuMP.OPTIMAL || termination_status(model) == JuMP.LOCALLY_SOLVED || return nothing
 

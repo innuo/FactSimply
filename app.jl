@@ -206,7 +206,7 @@ function ui()
           ])
         ]),
 
-        dialog(:show_help, position="top", persistent=false, auto__close=true, no__shake=true, noesc=false,
+        dialog(:show_help, position="top", persistent=false, auto__close=false, no__shake=true, noesc=false,
         [
             card(class = "help-card", bordered = true, flat=true, [
                 card_section(class="text-h5", "What Is This Tool For?", style="text-align: center;  color: var(--bs-primary); margin-bottom: 0px; margin-top=0px"),
@@ -350,27 +350,26 @@ function helpmsg()
     in their beliefs, and wonder what else those beliefs might imply. 
     This tool in some small measure attempts to allay those worries."), 
 
-    h6("Probabilistic Statements and Their Implications", style="margin-bottom: 10px;"),
+     h6("Probabilistic Statements and Their Implications", style="margin-bottom: 10px;"),
+        p(latex"The basic function of this tool is to enable positing the probability of joint specifications 
+        of certain variables conditioned on the joint specification of other variables, e.g.,  \(P(A=true | C=false, B=true) = 0.4\), 
+        and querying the probability of other such predicates, e.g., \(P(C=true | A=true) = ?\). Any number of such probabilistic
+        assumptions can be made before a query. Moreover, instead of an exact equality, the probability of
+        an assumption can be specified to lie in a range of values."auto),
 
-    p(latex"The basic function of this tool is to enable positing the probability of joint specifications 
-    of certain variables conditioned on the joint specification of other variables, e.g.,  \(P(A=true | C=false, B=true) = 0.4\), 
-    and querying the probability of other such predicates, e.g., \(P(C=true | A=true) = ?\). Any number of such probabilistic
-    assumptions can be made before a query. Moreover, instead of an exact equality, the probability of
-    an assumption can be specified to lie in a range of values."auto),
+        p("The query is answered in two different ways. The first asks \"of all probability distributions that 
+        agree with the assumptions specified, what is the smallest and the largest probability that can be assigned
+        to the query?\", and the second asks \"of all the probability distributions that agree with the assumptions, what probability does
+        the 'flattest' one assign to the query?\" -- the so-called <em> Maximum Entropy estimate </em> ."),
+   
 
-    p("The query is answered in two different ways. The first asks \"of all probability distributions that 
-    agree with the assumptions specified, what is the smallest and the largest probability that can be assigned
-    to the query?\", and the second asks \"of all the probability distributions that agree with the assumptions, what probability does
-    the 'flattest' one assign to the query?\" -- the so-called <em> Maximum Entropy estimate </em> ."),
-    
     h6("How To Use", style="margin-bottom: 10px;"),
+        p("The joint and conditional specification of the event are entered into the two text boxes resp., and the 
+        probability range is specified. If the assume button is clicked the probabilistic statement is
+        added to the set of assumptions."),
 
-    p("The joint and conditional specification of the event are entered into the two text boxes resp., and the 
-    probability range is specified. If the assume button is clicked the probabilistic statement is
-    added to the set of assumptions."),
-
-    p("The joint event is specified by typing in variables separated by commas. A '!' before a variable
-    indicates that it is set to false. For example '{A, !B, C}' would specify '{A=true, B=false, C=true}'"),
+        p("The joint event is specified by typing in variables separated by commas. A '!' before a variable
+        indicates that it is set to false. For example '{A, !B, C}' would specify '{A=true, B=false, C=true}'"),
 
 
     h6("Example Uses", style="margin-bottom: 10px;"),
