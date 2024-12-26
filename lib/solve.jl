@@ -68,11 +68,8 @@ function compute_bounds(ss::SampleSpace,
     optimal_solve = true
     termination_status(model) == JuMP.OPTIMAL || (optimal_solve = false)
     lb = objective_value(model)
-
-    @show solution_summary(model)
-
     @show lb, value(t)
-    print(model)
+
 
     @objective(model, Max, num)
     optimize!(model)
@@ -80,7 +77,6 @@ function compute_bounds(ss::SampleSpace,
 
     @show ">>>>>>>>>>>>>>>>>>>>>>>>>>>>UB"
     @show ub, value(t)
-
     termination_status(model) == JuMP.OPTIMAL || (optimal_solve = false)
 
     if optimal_solve
@@ -89,7 +85,5 @@ function compute_bounds(ss::SampleSpace,
         p = nothing
     end
 
-    print(model)
-    @show solution_summary(model)
     return p
 end

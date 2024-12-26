@@ -55,8 +55,7 @@ using StippleUI
         is_query = false
         query_error = false
         fact = Fact(id, what_text, when_text, prob_range, is_query)
-        @show "-------------"
-        @show fact
+
         feedback_str = fact.printable
 
         length(parse_input(what_text).vals) == 0 && return # nothing in the text field
@@ -64,8 +63,9 @@ using StippleUI
         id += 1
         push!(facts, deepcopy(fact))
 
+        
+
         @push facts
-        #latex_formula = raw"\begin{align} a &=b+c \\ d+e &=f \end{align}"
 
         num_facts = length(facts)
         @show num_facts
@@ -73,9 +73,14 @@ using StippleUI
     end
 
     @onbutton query_btn_clicked  begin
-        @show "query button clicked"
+        @info "query button clicked"
         is_query = true
-        query = Fact(0, what_text, when_text, (min=0.0, max=1.0), is_query)
+
+        pmin = 0.0
+        pmax = 1.0
+        prob_range = (min=0.0, max=1.0)
+
+        query = Fact(0, what_text, when_text, prob_range, is_query)
         feedback_str = query.printable
 
         (;sample_space, constraints, query_expression, query_vars) = parse_problem(facts, query)
@@ -97,16 +102,16 @@ using StippleUI
             p = round(clamp(p, 0.0, 1.0), digits=5)
             maxent_answer_str = to_string(Fact(0, what_text, when_text, (min=p, max=p), false))
         else
-            maxent_answer_str = "Maximum Entropy solver returned status other than OPTIMAL"
+            maxent_answer_str = "Maximum Entropy solver returned status other than OPTIMAL. Your assumptions are likely inconsistent."
         end
 
         p = FactSimply.compute_bounds(sample_space, constraints, query_expression)
-        @show p
+
         if !isnothing(p)
             p = round.(clamp.(p, 0.0, 1.0), digits=5)
             bounds_answer_str = to_string(Fact(0, what_text, when_text, (min=p[1], max=p[2]), false); eps=1e-6)
         else
-            bounds_answer_str = "Bounds solver returned status other than OPTIMAL"
+            bounds_answer_str = "Bounds solver returned status other than OPTIMAL. Your assumptions are likely inconsistent."
         end
 
     end
@@ -134,7 +139,6 @@ using StippleUI
     @onbutton show_help begin end
 
     @onbutton clear_btn_clicked  begin
-        id = 1
         what_text = ""
         when_text = ""
         pmin = 0.0
@@ -158,7 +162,7 @@ using StippleUI
         prob_range = (min=0.0, max=1.0)
         facts = Fact[]  
         num_facts = 0
-
+        id = 1
     end
 end
 
@@ -362,8 +366,9 @@ function helpmsg()
 
     h6("How To Use", style="margin-bottom: 10px;"),
         p("For each assumption or query, the joint and conditional specification of the event 
-        are entered into the two text boxes resp., and the probability range is specified. 
-        If the assume button is clicked the probabilistic statement is added to the set of assumptions."),
+        are entered into the two text boxes resp., and the probability range is specified. (Setting
+        the min and max probabilities close enough will turn the assumption into an equality.)
+        The assume button adds the probabilistic statement to the set of facts."),
 
         p("The joint event is specified by typing in variables separated by commas. A '!' before a variable
         indicates that it is set to false. For example '{x, !Y, Z}' would specify '{X=true, Y=false, Z=true}'"),
