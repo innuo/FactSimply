@@ -104,7 +104,7 @@ using StippleUI
         @show p
         if !isnothing(p)
             p = round.(clamp.(p, 0.0, 1.0), digits=5)
-            bounds_answer_str = to_string(Fact(0, what_text, when_text, (min=p[1], max=p[2]), false))
+            bounds_answer_str = to_string(Fact(0, what_text, when_text, (min=p[1], max=p[2]), false); eps=1e-6)
         else
             bounds_answer_str = "Bounds solver returned status other than OPTIMAL"
         end
@@ -361,12 +361,12 @@ function helpmsg()
    
 
     h6("How To Use", style="margin-bottom: 10px;"),
-        p("The joint and conditional specification of the event are entered into the two text boxes resp., and the 
-        probability range is specified. If the assume button is clicked the probabilistic statement is
-        added to the set of assumptions."),
+        p("For each assumption or query, the joint and conditional specification of the event 
+        are entered into the two text boxes resp., and the probability range is specified. 
+        If the assume button is clicked the probabilistic statement is added to the set of assumptions."),
 
         p("The joint event is specified by typing in variables separated by commas. A '!' before a variable
-        indicates that it is set to false. For example '{A, !B, C}' would specify '{A=true, B=false, C=true}'"),
+        indicates that it is set to false. For example '{x, !Y, Z}' would specify '{X=true, Y=false, Z=true}'"),
 
 
     h6("Example Uses", style="margin-bottom: 10px;"),

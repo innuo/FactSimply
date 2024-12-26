@@ -53,7 +53,12 @@ function compute_bounds(ss::SampleSpace,
     end 
 
     num, den = prob_terms(query, pmf_table, ss)
-    _add_constraint(model, den, 1.0, eq)
+    @show num, den
+    if den isa Number
+       @constraint(model, t == 1)
+    else
+        _add_constraint(model, den, 1.0, eq)
+    end
 
     @objective(model, Min, num)
     optimize!(model)
@@ -63,13 +68,17 @@ function compute_bounds(ss::SampleSpace,
     optimal_solve = true
     termination_status(model) == JuMP.OPTIMAL || (optimal_solve = false)
     lb = objective_value(model)
+
+    @show solution_summary(model)
+
     @show lb, value(t)
+    print(model)
 
     @objective(model, Max, num)
     optimize!(model)
     ub = objective_value(model)
 
-    @show "UB"
+    @show ">>>>>>>>>>>>>>>>>>>>>>>>>>>>UB"
     @show ub, value(t)
 
     termination_status(model) == JuMP.OPTIMAL || (optimal_solve = false)
@@ -81,6 +90,6 @@ function compute_bounds(ss::SampleSpace,
     end
 
     print(model)
-
+    @show solution_summary(model)
     return p
 end
