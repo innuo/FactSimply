@@ -1,5 +1,5 @@
 # pull latest julia image
-FROM --platform=linux/amd64 julia:latest
+FROM julia:latest
 
 # create dedicated user
 RUN useradd --create-home --shell /bin/bash genie
@@ -19,11 +19,8 @@ RUN chmod +x bin/runtask
 # switch user
 USER genie
 
-
-
 # instantiate Julia packages
 RUN julia -e "using Pkg; Pkg.activate(\".\"); Pkg.instantiate(); Pkg.precompile(); "
-
 
 # ports
 EXPOSE 8000
@@ -39,9 +36,5 @@ ENV EARLYBIND="true"
 ENV HOSTNAME="0.0.0.0"
 ENV HOST="0.0.0.0"
 
-
 # run app
 CMD ["bin/server"]
-
-# or maybe include a Julia file
-# CMD julia -e 'using Pkg; Pkg.activate("."); include("IrisClustering.jl"); '
