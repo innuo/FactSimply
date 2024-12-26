@@ -344,8 +344,9 @@ end
 
 function helpmsg()
    [
-    p("A great mind once declared that a foolish consistency is the hobgoblin of little minds. 
-    He probably followed that right away by its exact opposite, so we can safely ignore him."),
+    p("A great mind once said that a foolish consistency is the hobgoblin of little minds. 
+    He probably followed that right away by declaring its exact opposite, 
+    so we can safely ignore him."),
     
     p("Other, more medium sized minds are troubled sometimes by the possibility of an inconsistency 
     in their beliefs, and wonder what else those beliefs might imply. 
@@ -360,8 +361,8 @@ function helpmsg()
 
         p("The query is answered in two different ways. The first asks \"of all probability distributions that 
         agree with the assumptions specified, what is the smallest and the largest probability that can be assigned
-        to the query?\", and the second asks \"of all the probability distributions that agree with the assumptions, what probability does
-        the 'flattest' one assign to the query?\" -- the so-called <em> Maximum Entropy estimate </em> ."),
+        to the query?\", and the second asks \"of all the probability distributions that are consisten with the assumptions, what probability does
+        the 'flattest' (or the most uniform) one assign to the query?\" -- the so-called <a href='https://en.wikipedia.org/wiki/Principle_of_maximum_entropy' target='_blank' rel='noopener noreferrer'> <em> Maximum Entropy estimate </em></a>."),
    
 
     h6("How To Use", style="margin-bottom: 10px;"),
@@ -371,10 +372,33 @@ function helpmsg()
         The assume button adds the probabilistic statement to the set of facts."),
 
         p("The joint event is specified by typing in variables separated by commas. A '!' before a variable
-        indicates that it is set to false. For example '{x, !Y, Z}' would specify '{X=true, Y=false, Z=true}'"),
+        indicates that it is set to false. For example '{!x, !Y, z}' would specify '{X=false, Y=false, Z=true}'"),
 
 
     h6("Example Uses", style="margin-bottom: 10px;"),
+        p("<em> Simple Bayesian Inversion: </em> The simplest use one can put this tool to is to answer questions
+        of the WebMD type: \"If a rare disease expresses a symptom with a certain probability, then what is
+        probability that I have the disease given that I am showing the symptom.\" 
+        For example, <a href='https://en.wikipedia.org/wiki/Bayes%27_theorem#:~:text=45/92%20%E2%89%88%2049%25-,Cancer%20rate,-%5Bedit%5D' target='_blank' rel='noopener noreferrer'> this
+        cancer example</a> can be coded by making the assumptions 
+        P(C) = 0.00001, P(S|C) = 1.0, P(S| !C) = 0.0001, and querying P(C|S)."),
+
+        p("More complicated cases are possible such as if the disease also had a test with known false
+        positive and false negative rate, and it came back negative for you, but your family history
+        triples your risk over the general population."),
+
+        p("<a href='https://en.wikipedia.org/wiki/Fr%C3%A9chet_inequalities' target='_blank' rel='noopener noreferrer'> 
+         <em> Fréchet Inequalities</em> </a>: " ),
+
+        p("<em>Prediction Market Arbitrage: </em> If you prefer to be like some of my crass business pals, and
+        insist on enquiring after the cash value of the tool, I'll simply point out that you can use it
+        to look for arbitrage opportunities in conditional betting markets like Metaculus."),
+    h6("What's Left?", style="margin-bottom: 10px;"),
+    
+        p("Because of some arcane technical reasons like convexity of optimization problems, and 
+        linearizability of constraints, some obvious kinds of assumptions like statistical independence, 
+        or constraints of the type P(A|B) > P(C|B) etc. are not implmented. If you have a good idea 
+        on how to do it, please file an issue or better yet, a merge request at https://github.com/innuo/FactSimply."),
    ]
 end
 
