@@ -18,19 +18,13 @@ function maxent(ss::SampleSpace,
     @objective(model, Max, sum(t))
 
     optimize!(model)
-    print(model)
 
     @show termination_status(model), JuMP.OPTIMAL
     termination_status(model) == JuMP.OPTIMAL || termination_status(model) == JuMP.LOCALLY_SOLVED || return nothing
 
     maxent_pmf_table = value.(pmf_table)
 
-    @show maxent_pmf_table
-
     query_prob = prob(query, maxent_pmf_table, ss)
-
-    @show query
-    @show  query_prob
     @show ">>>>>>>>>>>>>>>>>>>>>>>>>> Max Ent"
     @show solution_summary(model)
 
@@ -43,9 +37,10 @@ function compute_bounds(ss::SampleSpace,
 
     model = JuMP.Model(HiGHS.Optimizer)
 
-    @variable(model, 0 <= pmf_table[ss.var_index] <= 1)
+    @variable(model, 0 <= pmf_table[ss.var_index])
     @variable(model, 0 <= t) #linear fractional t
 
+    @constraint(model, pmf_table .<= t)
     @constraint(model, sum(pmf_table[i] for i in ss.var_index) == t)
 
     for c in constraints
