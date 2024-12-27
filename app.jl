@@ -361,7 +361,7 @@ function helpmsg()
 
         p("The query is answered in two different ways. The first asks \"of all probability distributions that 
         agree with the assumptions specified, what is the smallest and the largest probability that can be assigned
-        to the query?\", and the second asks \"of all the probability distributions that are consisten with the assumptions, what probability does
+        to the query?\", and the second asks \"of all the probability distributions that are consistent with the assumptions, what probability does
         the 'flattest' (or the most uniform) one assign to the query?\" -- the so-called <a href='https://en.wikipedia.org/wiki/Principle_of_maximum_entropy' target='_blank' rel='noopener noreferrer'> <em> Maximum Entropy estimate </em></a>."),
    
 
