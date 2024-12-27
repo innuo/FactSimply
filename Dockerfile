@@ -37,4 +37,5 @@ ENV HOSTNAME="0.0.0.0"
 ENV HOST="0.0.0.0"
 
 # run app
-CMD ["bin/server"]
+#CMD ["bin/server"]
+ENTRYPOINT ["julia", "--project", "-e", "using GenieFramework; Genie.loadapp(); up(async=false);"]

@@ -257,9 +257,9 @@ function ui()
                 ]),
                 
                 row([
-                    cell(class="col-1 btn-fact",button("Assume", class="btn btn-primary", (class!)="{ 'btn-focused' : filterAll }", @click(:assume_btn_clicked ))),
-                    cell(class="col-1 btn-fact", button("Query", class="btn btn-primary", (class!)="{ 'btn-focused' : filterActive }", @click(:query_btn_clicked ))),
-                    cell(class="col-2 btn-fact", style="margin-right: 0; margin-left: auto;", button("Clear & Restart", class="btn btn-primary", (class!)="{ 'btn-focused' : filterActive }", @click(:clear_btn_clicked ))),
+                    cell(class="col-1", style=" margin-right: 0px;",button("Assume", class="btn btn-primary", @click(:assume_btn_clicked))),
+                    cell(class="col-1",  style=" margin-right: 0px;", button("Query", class="btn btn-primary", @click(:query_btn_clicked))),
+                    cell(class="col-2", style="margin-right: 0; margin-left: auto;", button("Clear & Restart", class="btn btn-primary", @click(:clear_btn_clicked))),
                     ]),                   
             ]),
           
@@ -269,7 +269,7 @@ function ui()
                     ul(class="facts-list", [
                         li(class="facts-item", @recur("fact in facts"), [
                             p("{{fact.printable}}", style="margin: 0;"),
-                            button("×", class="btn-delete_fact_id", outline=true, color = "red", @on("click", "delete_fact_id = fact.id"))
+                            btn("×", class="btn-delete_fact_id", outline=true, color = "red", @on("click", "delete_fact_id = fact.id"))
                         ])
                     ])
                 ]),
