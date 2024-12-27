@@ -379,13 +379,13 @@ function helpmsg()
         p("<em> Simple Bayesian Inversion: </em> The simplest use one can put this tool to is to answer questions
         of the WebMD type: \"If a rare disease expresses a symptom with a certain probability, then what is
         probability that I have the disease given that I am showing the symptom.\" 
-        For example, <a href='https://en.wikipedia.org/wiki/Bayes%27_theorem#:~:text=45/92%20%E2%89%88%2049%25-,Cancer%20rate,-%5Bedit%5D' target='_blank' rel='noopener noreferrer'> this
+        For instance, this <a href='https://en.wikipedia.org/wiki/Bayes%27_theorem#:~:text=45/92%20%E2%89%88%2049%25-,Cancer%20rate,-%5Bedit%5D' target='_blank' rel='noopener noreferrer'> 
         cancer example</a> can be coded by making the assumptions 
         P(C) = 0.00001, P(S|C) = 1.0, P(S| !C) = 0.0001, and querying P(C|S)."),
 
-        p("More complicated cases are possible such as if the disease also had a test with known false
+        p("More complicated sets of assumptions are allowed, such as if the disease also had a test with known false
         positive and false negative rate, and it came back negative for you, but your family history
-        triples your risk over the general population."),
+        triples your risk over the general population etc. etc."),
 
         p("<a href='https://en.wikipedia.org/wiki/Fr%C3%A9chet_inequalities' target='_blank' rel='noopener noreferrer'> 
          <em> Fréchet Inequalities</em> </a>: If 51% of U.S. households have a dog and 35% have a cat, what
