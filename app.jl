@@ -388,16 +388,19 @@ function helpmsg()
         triples your risk over the general population."),
 
         p("<a href='https://en.wikipedia.org/wiki/Fr%C3%A9chet_inequalities' target='_blank' rel='noopener noreferrer'> 
-         <em> Fréchet Inequalities</em> </a>: " ),
+         <em> Fréchet Inequalities</em> </a>: If 51% of U.S. households have a dog and 35% have a cat, what
+         is the minimum percentage of households that own neither a cat nor a dog (P(D) = 0.51, P(C) = 0.36, 
+         P(!D,!C)= ?) This, and thornier questions of the sort are grist for this mill.
+         " ),
 
-        p("<em>Prediction Market Arbitrage: </em> If you prefer to be like some of my crass business pals, and
-        insist on enquiring after the cash value of the tool, I'll simply point out that you can use it
+        p("<em>Prediction Market Arbitrage: </em> If you prefer to be crassly commercial and
+        insist on enquiring about the cash value of the tool, I'll simply point out that you can use it
         to look for arbitrage opportunities in conditional betting markets like Metaculus."),
     h6("What's Left?", style="margin-bottom: 10px;"),
-    
+
         p("Because of some arcane technical reasons like convexity of optimization problems, and 
-        linearizability of constraints, some obvious kinds of assumptions like statistical independence, 
-        or constraints of the type P(A|B) > P(C|B) etc. are not implmented. If you have a good idea 
+        linearizability of constraints, some obvious types of assumptions like statistical independence, 
+        or constraints of the type P(A|B) > P(C|B) etc. are not currently supported. If you have a good idea 
         on how to do it, please file an issue or better yet, a merge request at https://github.com/innuo/FactSimply."),
    ]
 end
