@@ -269,7 +269,7 @@ function ui()
                     ul(class="facts-list", [
                         li(class="facts-item", @recur("fact in facts"), [
                             p("{{fact.printable}}", style="margin: 0;"),
-                            btn("×", class="btn-delete_fact_id", outline=true, color = "red", @on("click", "delete_fact_id = fact.id"))
+                            button("×", class="btn-delete_fact_id", outline=true, color = "red", @on("click", "delete_fact_id = fact.id"))
                         ])
                     ])
                 ]),
@@ -344,7 +344,7 @@ end
 
 function helpmsg()
    [
-    p("A great mind once said that a foolish consistency is the hobgoblin of little minds. 
+    p("A great mind once asserted that a foolish consistency is the hobgoblin of little minds. 
     He probably followed that right away by declaring its exact opposite, 
     so we can safely ignore him."),
     
@@ -372,7 +372,7 @@ function helpmsg()
         The assume button adds the probabilistic statement to the set of facts."),
 
         p("The joint event is specified by typing in variables separated by commas. A '!' before a variable
-        indicates that it is set to false. For example '{!x, !Y, z}' would specify '{X=false, Y=false, Z=true}'"),
+        indicates that it is set to false. For example '!x, !Y, z' would denote 'X=false, Y=false, Z=true'"),
 
 
     h6("Example Uses", style="margin-bottom: 10px;"),
@@ -390,18 +390,19 @@ function helpmsg()
         p("<a href='https://en.wikipedia.org/wiki/Fr%C3%A9chet_inequalities' target='_blank' rel='noopener noreferrer'> 
          <em> Fréchet Inequalities</em> </a>: If 51% of U.S. households have a dog and 35% have a cat, what
          is the minimum percentage of households that own neither a cat nor a dog (P(D) = 0.51, P(C) = 0.36, 
-         P(!D,!C)= ?) This, and thornier questions of the sort are grist for this mill.
+         P(!D,!C)= ?) This, and thornier questions of this sort are all grist for this mill.
          " ),
 
         p("<em>Prediction Market Arbitrage: </em> If you prefer to be crassly commercial and
         insist on enquiring about the cash value of the tool, I'll simply point out that you can use it
         to look for arbitrage opportunities in conditional betting markets like Metaculus."),
+    
     h6("What's Left?", style="margin-bottom: 10px;"),
 
         p("Because of some arcane technical reasons like convexity of optimization problems, and 
-        linearizability of constraints, some obvious types of assumptions like statistical independence, 
-        or constraints of the type P(A|B) > P(C|B) etc. are not currently supported. If you have a good idea 
-        on how to do it, please file an issue or better yet, a merge request at https://github.com/innuo/FactSimply."),
+        linearizability of constraints, some obvious varieties of assumptions like statistical independence, 
+        or constraints of the type P(A|B) > P(C|B) are not currently supported. If you have a good idea 
+        on how to handle them, please file an issue, or better yet, a merge request at https://github.com/innuo/FactSimply."),
    ]
 end
 
