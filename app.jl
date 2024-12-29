@@ -374,6 +374,9 @@ function helpmsg()
         p("The joint event is specified by typing in variables separated by commas. A '!' before a variable
         indicates that it is set to false. For example '!x, !Y, z' would denote 'X=false, Y=false, Z=true'"),
 
+        p("The first query is usually slower and might take a few seconds to answer. The ones after that should 
+        be very quick."),
+
 
     h6("Example Uses", style="margin-bottom: 10px;"),
         p("<em> Simple Bayesian Inversion: </em> The simplest use one can put this tool to is to answer questions
@@ -389,7 +392,8 @@ function helpmsg()
 
         p("<a href='https://en.wikipedia.org/wiki/Fr%C3%A9chet_inequalities' target='_blank' rel='noopener noreferrer'> 
          <em> Fréchet Inequalities</em> </a>: If 51% of U.S. households have a dog and 35% have a cat, what
-         is the minimum percentage of households that own neither a cat nor a dog (P(D) = 0.51, P(C) = 0.36, 
+         is the minimum percentage of households that own neither a cat nor a dog; and what
+         is your best guess at that percentage? (You'd specify: P(D) = 0.51, P(C) = 0.36, 
          P(!D,!C)= ?) This, and thornier questions of this sort are all grist for this mill.
          " ),
 
@@ -399,12 +403,12 @@ function helpmsg()
     
     h6("What's Left?", style="margin-bottom: 10px;"),
 
-        p("Because of some arcane technical reasons like convexity of optimization problems, and 
-        linearizability of constraints, some obvious varieties of assumptions like statistical independence, 
+        p("Because of some arcane technical reasons like convexity of the optimization problems, and 
+        linearizability of the constraints, some obvious varieties of assumptions like statistical independence, 
         or constraints of the type P(A|B) > P(C|B) are not currently supported. If you have a good idea 
         on how to handle them, please file an issue, or better yet, a merge request at https://github.com/innuo/FactSimply."),
    ]
 end
 
-@page("/", ui, layout=layout(); debounce = 200)
+@page("/factsimply", ui, layout=layout(); debounce = 200)
 end
