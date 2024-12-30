@@ -410,5 +410,5 @@ function helpmsg()
    ]
 end
 
-@page("/factsimply", ui, layout=layout(); debounce = 200)
+@page("/", ui, layout=layout(); debounce = 200)
 end
