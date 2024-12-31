@@ -21,7 +21,7 @@ The assume button adds the probabilistic statement to the set of facts.
 The joint event is specified by typing in variables separated by commas. A '!' before a variable indicates that it 
 is set to false. For example '!x, !Y, z' would denote 'X=false, Y=false, Z=true'
 
-Example Uses
+### Example Uses
 Simple Bayesian Inversion: The simplest use one can put this tool to is to answer questions of the WebMD type: 
 "If a rare disease expresses a symptom with a certain probability, then what is probability that I have the disease given that 
 I am showing the symptom." For instance, this cancer example can be coded by making the 
@@ -37,7 +37,7 @@ households that own neither a cat nor a dog; and what is your best guess at that
 Prediction Market Arbitrage: If you prefer to be crassly commercial and insist on enquiring about the cash value of the tool,
 I'll simply point out that you can use it to look for arbitrage opportunities in conditional betting markets like Metaculus.
 
-What's Left?
+### What's Left?
 Because of some arcane technical reasons like convexity of the optimization problems, and linearizability of the constraints, 
 some obvious varieties of assumptions like statistical independence, or constraints of the type P(A|B) > P(C|B) are not currently 
 supported. If you have a good idea on how to handle them, please file an issue, or better yet, a merge request here. 
