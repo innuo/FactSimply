@@ -63,8 +63,6 @@ using StippleUI
         id += 1
         push!(facts, deepcopy(fact))
 
-        
-
         @push facts
 
         num_facts = length(facts)
@@ -124,6 +122,8 @@ using StippleUI
         @show [f.id for f in facts]
         @show num_facts
         delete_fact_id[!] = 0 
+        maxent_answer_str = ""
+        bounds_answer_str = ""
     end
 
     @onchange pmin begin
